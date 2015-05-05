@@ -1,13 +1,26 @@
 <html>
 	<head>
 		<title>github.andrewt.net / majority</title>
+		<style type="text/css">
+			label::after {
+				content: ': ';
+			}
+		</style>
 	</head>
 	<body>
 		<ul id="parties"></ul>
+		<div>Everyone else: <span id="others"></span></div>
+		<div>
+			<label for="majority">Seats needed to govern</label>
+			<input id="majority" name="majority" type="number" value="326">
+		</div>
+		<h1>Majorities</h1>
 		<ul id="majorities"></ul>
 		<script type="text/javascript">
 			var pList = document.getElementById('parties'),
 				mList = document.getElementById('majorities'),
+				others = document.getElementById('others'),
+				mBox = document.getElementById('majority'),
 				n = 1;
 			function addParty(name, colour, seats) {
 				var li = document.createElement('li');
@@ -49,6 +62,7 @@
 			addParty('SNP', '#dd0');
 			addParty('Plaid Cymru', 'green');
 			addParty();
+			majoritise();
 			function majoritise() {
 				mList.innerHTML = '';
 				var parties = [];
@@ -57,7 +71,16 @@
 				parties = parties.sort(function(a, b) {
 					return b.seats - a.seats;
 				}).filter(function(a) { return a.name; });
-				var majority = 326;
+				var seats = countSeats(parties);
+				if (seats < 650) {
+					parties.push({
+						name: 'Everyone else',
+						colour: 'gray',
+						seats: 650 - seats
+					});
+				}
+				others.innerHTML = 650 - seats;
+				var majority = parseFloat(mBox.value);
 				build([]);
 				function build(pre) {
 					parties.forEach(function(next) {
@@ -66,8 +89,7 @@
 							!~pre.indexOf(next)) {
 							var now = pre.slice();
 							now.push(next);
-							var seats = 0;
-							now.forEach(function(x) { seats += x.seats; });
+							var seats = countSeats(now);
 							if (seats >= majority) {
 								var li = document.createElement('li');
 								li.innerHTML = now.map(function(x) {
@@ -79,6 +101,11 @@
 					});
 				}
 			}
+			function countSeats(parties) {
+				var seats = 0;
+				parties.forEach(function(x) { seats += x.seats; });
+				return seats;
+			}
 			function read(p, i) {
 				var x = {};
 				p.forEach(function(k) {
@@ -89,4 +116,4 @@
 			}
 		</script>
 	</body>
-</html>
+</html>	
