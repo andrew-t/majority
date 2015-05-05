@@ -30,7 +30,7 @@
 					});
 				++n;
 				function colourCBox() {
-					cBox.style.background = cBox.value;
+					cBox.style.color = cBox.value;
 				};
 			}
 			function box(label, type, value) {
@@ -43,10 +43,10 @@
 			}
 			addParty('Labour', 'red');
 			addParty('Conservatives', 'blue');
-			addParty('Lib Dems', 'yellow');
-			addParty('Greens', 'green');
+			addParty('Lib Dems', '#f80');
+			addParty('Greens', '#4d4');
 			addParty('UKIP', 'purple');
-			addParty('SNP', 'yellow');
+			addParty('SNP', '#dd0');
 			addParty('Plaid Cymru', 'green');
 			addParty();
 			function majoritise() {
@@ -70,7 +70,9 @@
 							now.forEach(function(x) { seats += x.seats; });
 							if (seats >= majority) {
 								var li = document.createElement('li');
-								li.innerHTML = now.map(function(x) { return x.name; }).join(' + ') + ' = ' + seats;
+								li.innerHTML = now.map(function(x) {
+									return '<span style="color: ' + x.colour + '">' + x.name + '</span>';
+								}).join(' + ') + ' = ' + seats;
 								mList.appendChild(li);
 							} else build(now);
 						}
