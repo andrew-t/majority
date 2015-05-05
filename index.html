@@ -2,9 +2,7 @@
 	<head>
 		<title>github.andrewt.net / majority</title>
 		<style type="text/css">
-			label::after {
-				content: ': ';
-			}
+			label::after { content: ': '; }
 		</style>
 	</head>
 	<body>
@@ -14,8 +12,7 @@
 			<label for="majority">Seats needed to govern</label>
 			<input id="majority" name="majority" type="number" value="326">
 		</div>
-		<h1>Majorities</h1>
-		<ul id="majorities"></ul>
+		<section><h1>Majorities</h1><ul id="majorities"></ul></section>
 		<script type="text/javascript">
 			var pList = document.getElementById('parties'),
 				mList = document.getElementById('majorities'),
@@ -34,17 +31,14 @@
 				var cBox = document.getElementById('colour-' + n);
 				cBox.addEventListener('input', colourCBox);
 				colourCBox();
-				document.getElementById('name-' + n)
-					.addEventListener('input', function() {
-						for (var i = 1; i < n; ++i)
-							if (!document.getElementById('name-' + i).value)
-								return;
-						addParty();
-					});
+				document.getElementById('name-' + n).addEventListener('input', function() {
+					for (var i = 1; i < n; ++i)
+						if (!document.getElementById('name-' + i).value)
+							return;
+					addParty();
+				});
 				++n;
-				function colourCBox() {
-					cBox.style.color = cBox.value;
-				};
+				function colourCBox() { cBox.style.color = cBox.value; };
 			}
 			function box(label, type, value) {
 				var id = label.replace(/ /g, '') + '-' + n;
@@ -65,14 +59,10 @@
 			majoritise();
 			mBox.addEventListener('input', majoritise);
 			function sort(a, b) {
-				if (a.name == 'Everyone else')
-					return 1;
-				if (b.name == 'Everyone else')
-					return -1;
-				if (a.seats != b.seats)
-					return b.seats - a.seats;
-				if (a.name == b.name)
-					return 0;
+				if (a.name == 'Everyone else') return 1;
+				if (b.name == 'Everyone else') return -1;
+				if (a.seats != b.seats) return b.seats - a.seats;
+				if (a.name == b.name) return 0;
 				return a.name > b.name ? 1 : -1;
 			}
 			function majoritise() {
