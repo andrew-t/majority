@@ -1,0 +1,90 @@
+<html>
+	<head>
+		<title>github.andrewt.net / majority</title>
+	</head>
+	<body>
+		<ul id="parties"></ul>
+		<ul id="majorities"></ul>
+		<script type="text/javascript">
+			var pList = document.getElementById('parties'),
+				mList = document.getElementById('majorities'),
+				n = 1;
+			function addParty(name, colour, seats) {
+				var li = document.createElement('li');
+				li.id = 'party-' + n;
+				li.innerHTML = box('name', 'text', name) +
+					box('colour', 'text', colour) +
+					box('seats', 'number', seats);
+				pList.appendChild(li);
+				var cBox = document.getElementById('colour-' + n);
+				cBox.addEventListener('input', colourCBox);
+				colourCBox();
+				document.getElementById('seats-' + n)
+					.addEventListener('input', majoritise);
+				document.getElementById('name-' + n)
+					.addEventListener('input', function() {
+						for (var i = 1; i < n; ++i)
+							if (!document.getElementById('name-' + i).value)
+								return;
+						addParty();
+					});
+				++n;
+				function colourCBox() {
+					cBox.style.background = cBox.value;
+				};
+			}
+			function box(label, type, value) {
+				var id = label.replace(/ /g, '') + '-' + n;
+				return '<label for="' + id + '">' + label + '</label>' +
+					'<input id="' + id +
+						'" name="' + id +
+						'" value="' + (value || '') +
+						'" type="' + (type || 'text') + '">';
+			}
+			addParty('Labour', 'red');
+			addParty('Conservatives', 'blue');
+			addParty('Lib Dems', 'yellow');
+			addParty('Greens', 'green');
+			addParty('UKIP', 'purple');
+			addParty('SNP', 'yellow');
+			addParty('Plaid Cymru', 'green');
+			addParty();
+			function majoritise() {
+				mList.innerHTML = '';
+				var parties = [];
+				for (var i = 1; i < n - 1; ++i)
+					parties.push(read(['name', 'colour', 'seats'], i));
+				parties = parties.sort(function(a, b) {
+					return b.seats - a.seats;
+				}).filter(function(a) { return a.name; });
+				var majority = 326;
+				build([]);
+				function build(pre) {
+					parties.forEach(function(next) {
+						if (next.seats &&
+							(!pre.length || next.seats < pre[pre.length - 1].seats) &&
+							!~pre.indexOf(next)) {
+							var now = pre.slice();
+							now.push(next);
+							var seats = 0;
+							now.forEach(function(x) { seats += x.seats; });
+							if (seats >= majority) {
+								var li = document.createElement('li');
+								li.innerHTML = now.map(function(x) { return x.name; }).join(' + ') + ' = ' + seats;
+								mList.appendChild(li);
+							} else build(now);
+						}
+					});
+				}
+			}
+			function read(p, i) {
+				var x = {};
+				p.forEach(function(k) {
+					var j = document.getElementById(k + '-' + i);
+					x[k] = (j.type == 'number') ? parseFloat(j.value || '0') : j.value;
+				});
+				return x;
+			}
+		</script>
+	</body>
+</html>
