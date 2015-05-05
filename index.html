@@ -63,6 +63,7 @@
 			addParty('Plaid Cymru', 'green');
 			addParty();
 			majoritise();
+			mBox.addEventListener('input', majoritise);
 			function majoritise() {
 				mList.innerHTML = '';
 				var parties = [];
