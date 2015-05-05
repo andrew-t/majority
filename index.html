@@ -64,29 +64,37 @@
 			addParty();
 			majoritise();
 			mBox.addEventListener('input', majoritise);
+			function sort(a, b) {
+				if (a.name == 'Everyone else')
+					return 1;
+				if (b.name == 'Everyone else')
+					return -1;
+				if (a.seats != b.seats)
+					return b.seats - a.seats;
+				if (a.name == b.name)
+					return 0;
+				return a.name > b.name ? 1 : -1;
+			}
 			function majoritise() {
 				mList.innerHTML = '';
 				var parties = [];
 				for (var i = 1; i < n - 1; ++i)
 					parties.push(read(['name', 'colour', 'seats'], i));
-				parties = parties.sort(function(a, b) {
-					return b.seats - a.seats;
-				}).filter(function(a) { return a.name; });
+				parties = parties.sort(sort).filter(function(a) { return a.name; });
 				var seats = countSeats(parties);
-				if (seats < 650) {
+				if (seats < 650)
 					parties.push({
 						name: 'Everyone else',
 						colour: 'gray',
 						seats: 650 - seats
 					});
-				}
 				others.innerHTML = 650 - seats;
 				var majority = parseFloat(mBox.value);
 				build([]);
 				function build(pre) {
 					parties.forEach(function(next) {
 						if (next.seats &&
-							(!pre.length || next.name == 'Everyone else' || next.seats <= pre[pre.length - 1].seats) &&
+							(!pre.length || (sort(next, pre[pre.length - 1]) > 0)) &&
 							!~pre.indexOf(next)) {
 							var now = pre.slice();
 							now.push(next);
