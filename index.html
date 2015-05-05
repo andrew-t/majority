@@ -27,12 +27,15 @@
 				li.id = 'party-' + n;
 				li.innerHTML = box('name', 'text', name) +
 					box('colour', 'text', colour) +
-					box('seats', 'number', seats);
+					box('seats', 'number', seats) +
+					box('vote share', 'number', seats) + '%';
 				pList.appendChild(li);
 				var cBox = document.getElementById('colour-' + n);
 				cBox.addEventListener('input', colourCBox);
 				colourCBox();
 				document.getElementById('seats-' + n)
+					.addEventListener('input', majoritise);
+				document.getElementById('voteshare-' + n)
 					.addEventListener('input', majoritise);
 				document.getElementById('name-' + n)
 					.addEventListener('input', function() {
@@ -79,9 +82,9 @@
 				mList.innerHTML = '';
 				var parties = [];
 				for (var i = 1; i < n - 1; ++i)
-					parties.push(read(['name', 'colour', 'seats'], i));
+					parties.push(read(['name', 'colour', 'seats', 'voteshare'], i));
 				parties = parties.sort(sort).filter(function(a) { return a.name; });
-				var seats = countSeats(parties);
+				var seats = sum(parties, 'seats');
 				if (seats < 650)
 					parties.push({
 						name: 'Everyone else',
@@ -98,21 +101,21 @@
 							!~pre.indexOf(next)) {
 							var now = pre.slice();
 							now.push(next);
-							var seats = countSeats(now);
+							var seats = sum(now, 'seats');
 							if (seats >= majority) {
 								var li = document.createElement('li');
 								li.innerHTML = now.map(function(x) {
 									return '<span style="color: ' + x.colour + '">' + x.name + '</span>';
-								}).join(' + ') + ' = ' + seats;
+								}).join(' + ') + ' = ' + seats + ' (' + sum(now, 'voteshare') + '%)';
 								mList.appendChild(li);
 							} else build(now);
 						}
 					});
 				}
 			}
-			function countSeats(parties) {
+			function sum(parties, k) {
 				var seats = 0;
-				parties.forEach(function(x) { seats += x.seats; });
+				parties.forEach(function(x) { if (x[k]) seats += x[k]; });
 				return seats;
 			}
 			function read(p, i) {
