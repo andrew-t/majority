@@ -22,6 +22,7 @@
 				others = document.getElementById('others'),
 				mBox = document.getElementById('majority'),
 				n = 1;
+			document.body.addEventListener('input', majoritise);
 			function addParty(name, colour, seats) {
 				var li = document.createElement('li');
 				li.id = 'party-' + n;
@@ -33,10 +34,6 @@
 				var cBox = document.getElementById('colour-' + n);
 				cBox.addEventListener('input', colourCBox);
 				colourCBox();
-				document.getElementById('seats-' + n)
-					.addEventListener('input', majoritise);
-				document.getElementById('voteshare-' + n)
-					.addEventListener('input', majoritise);
 				document.getElementById('name-' + n)
 					.addEventListener('input', function() {
 						for (var i = 1; i < n; ++i)
