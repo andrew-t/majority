@@ -86,7 +86,7 @@
 				function build(pre) {
 					parties.forEach(function(next) {
 						if (next.seats &&
-							(!pre.length || next.seats < pre[pre.length - 1].seats) &&
+							(!pre.length || next.seats <= pre[pre.length - 1].seats) &&
 							!~pre.indexOf(next)) {
 							var now = pre.slice();
 							now.push(next);
