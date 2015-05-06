@@ -1,0 +1,58 @@
+label::after {
+	content: ': ';
+}
+input {
+	font-size: 1em;
+	width: 5em;
+}
+.name input {
+	width: 10em;
+}
+a {
+	display: inline-block;
+	margin: 1em;
+	padding: 0 .5em;
+	background: blue;
+	color: white;
+	text-decoration: none;
+}
+a:hover {
+	color: blue;
+	background: white;
+}
+section, body {
+	margin: 0;
+	font-family: sans-serif;
+}
+h1 {
+	padding: 0 1em;
+}
+section > div, section > a {
+	padding: 1em .5em;
+}
+ul {
+	padding: 0;
+}
+ul li {
+	list-style: none;
+}
+#majorities li {
+	padding: 0 .5em;
+	line-height: 2;
+	min-height: 2em;
+	background: white;
+	border-bottom: 1px solid black;
+}
+#majorities {
+	border-top: 1px solid black;
+}
+ul li:nth-child(2n) {
+	background: #ddd;
+}
+ul div {
+	display: inline-block;
+	padding: .5em;
+}
+.colours .colour, .vote-share .voteshare {
+	display: none !important;
+}
