@@ -3,22 +3,49 @@
 		<title>github.andrewt.net / majority</title>
 		<style type="text/css">
 			label::after { content: ': '; }
+			input { font-size: 1em; width: 5em; }
+			.name input { width: 10em; }
+			a { display: inline-block; margin: 1em; padding: 0 .5em; background: blue; color: white; text-decoration: none; }
+			a:hover { color: blue; background: white; }
+			section, body { margin: 0; font-family: sans-serif; }
+			h1 { padding: 0 1em; }
+			section > div, section > a { padding: 1em .5em; }
+			ul { padding: 0; }
+			ul li { list-style: none; }
+			#majorities li { padding: 0 .5em; line-height: 2; min-height: 2em; }
+			ul li:nth-child(2n) { background: #ddd; }
+			ul div { display: inline-block; padding: .5em; }
+			.colours .colour, .vote-share .voteshare { display: none !important; }
 		</style>
 	</head>
-	<body>
-		<ul id="parties"></ul>
-		<div>Everyone else: <span id="others"></span></div>
-		<div>
-			<label for="majority">Seats needed to govern</label>
-			<input id="majority" name="majority" type="number" value="326">
-		</div>
+	<body class="colours vote-share">
+		<section><h1>Parties</h1><ul id="parties"></ul></section>
+		<section>
+			<div>Everyone else: <span id="others"></span></div>
+			<div>
+				<label for="majority">Seats needed to govern</label>
+				<input id="majority" name="majority" type="number" value="326">
+			</div>
+		</section>
 		<section><h1>Majorities</h1><ul id="majorities"></ul></section>
+		<section>
+			<a href="#" id="show-colours">Toggle colours</a>
+			<a href="#" id="show-vote-share">Toggle vote share</a>
+		</section>
 		<script type="text/javascript">
 			var pList = document.getElementById('parties'),
 				mList = document.getElementById('majorities'),
 				others = document.getElementById('others'),
 				mBox = document.getElementById('majority'),
 				n = 1;
+			function button(id, cName) {
+				document.getElementById(id).addEventListener('click', function(e) {
+					document.body.classList.toggle(cName);
+					e.preventDefault();
+				})
+			}
+			button('show-colours', 'colours');
+			button('show-vote-share', 'vote-share');
 			document.body.addEventListener('input', majoritise);
 			function addParty(name, colour, seats) {
 				var li = document.createElement('li');
@@ -26,7 +53,7 @@
 				li.innerHTML = box('name', 'text', name) +
 					box('colour', 'text', colour) +
 					box('seats', 'number', seats) +
-					box('vote share', 'number', seats) + '%';
+					box('vote share', 'number', seats, '%');
 				pList.appendChild(li);
 				var cBox = document.getElementById('colour-' + n);
 				cBox.addEventListener('input', colourCBox);
@@ -40,13 +67,17 @@
 				++n;
 				function colourCBox() { cBox.style.color = cBox.value; };
 			}
-			function box(label, type, value) {
-				var id = label.replace(/ /g, '') + '-' + n;
-				return '<label for="' + id + '">' + label + '</label>' +
-					'<input id="' + id +
-						'" name="' + id +
-						'" value="' + (value || '') +
-						'" type="' + (type || 'text') + '">';
+			function box(label, type, value, after) {
+				var lbl = label.replace(/ /g, ''),
+					id = lbl + '-' + n;
+				return '<div class="' + lbl + '">' +
+							'<label for="' + id + '">' + label + '</label>' +
+							'<input id="' + id +
+								'" name="' + id +
+								'" value="' + (value || '') +
+								'" type="' + (type || 'text') + '">' +
+							(after || '') + 
+						'</div>';
 			}
 			addParty('Labour', 'red');
 			addParty('Conservatives', 'blue');
@@ -90,10 +121,13 @@
 							now.push(next);
 							var seats = sum(now, 'seats');
 							if (seats >= majority) {
-								var li = document.createElement('li');
+								var li = document.createElement('li'),
+									pm = thing(now, seats);
 								li.innerHTML = now.map(function(x) {
 									return '<span style="color: ' + x.colour + '">' + x.name + '</span>';
-								}).join(' + ') + ' = ' + seats + ' (' + sum(now, 'voteshare') + '%)';
+								}).join(' + ') + ' = ' + seats +
+									' <span class="voteshare">(' + sum(now, 'voteshare') + '%)</span> ' +
+									(pm ? '<a href="' + pm + '" target="_blank">View PM</a>' : '');
 								mList.appendChild(li);
 							} else build(now);
 						}
@@ -106,12 +140,20 @@
 				return seats;
 			}
 			function read(p, i) {
-				var x = {};
+				var x = { i: i };
 				p.forEach(function(k) {
 					var j = document.getElementById(k + '-' + i);
 					x[k] = (j.type == 'number') ? parseFloat(j.value || '0') : j.value;
 				});
 				return x;
+			}
+			function thing(coalition, seats) {
+				var pm = [0, 0, 0, 0, 0, 0, 0], ok = false;
+				coalition.forEach(function(party) { if (party.i < 7) {
+					pm[party.i] = party.seats / seats;
+					ok = true;
+				}});
+				return ok && ('http://github.andrewt.net/thingometer#' + JSON.stringify(pm));
 			}
 		</script>
 	</body>
