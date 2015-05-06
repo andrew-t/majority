@@ -150,7 +150,7 @@
 			function thing(coalition, seats) {
 				var pm = [0, 0, 0, 0, 0, 0, 0], ok = false;
 				coalition.forEach(function(party) { if (party.i < 7) {
-					pm[party.i] = party.seats / seats;
+					pm[[null,1,0,2,3,4,5,6][party.i]] = party.seats / seats;
 					ok = true;
 				}});
 				return ok && ('http://github.andrewt.net/thingometer#' + JSON.stringify(pm));
