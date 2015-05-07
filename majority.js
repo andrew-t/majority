@@ -244,6 +244,9 @@ function majoritise() {
 		chart.appendChild(middle);
 		middle.className = 'bar middle';
 		coalition.opposition.forEach(function(party) {
+			if(!party.seats) {
+				return;
+			}
 			var bar = document.createElement('span');
 			chart.appendChild(bar);
 			bar.className = 'bar';
@@ -274,7 +277,7 @@ function pm_link(coalition, seats) {
 
 	if(ok) {
 		var url = 'http://github.andrewt.net/thingometer#' + JSON.stringify(pm);
-		return '<a href="' + url + '" target="_blank">View PM</a>';
+		return '<a class="btn" href="' + url + '" target="_blank">View PM</a>';
 	} else {
 		return '';
 	}

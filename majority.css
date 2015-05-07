@@ -5,7 +5,7 @@ input {
 .name input {
 	width: 10em;
 }
-a {
+.btn {
 	display: inline-block;
 	margin: 1em;
 	padding: 0 .5em;
@@ -24,7 +24,7 @@ section, body {
 h1 {
 	padding: 0 1em;
 }
-section > div, section > a {
+section > div, section > a.btn, section > p {
 	padding: 1em .5em;
 }
 ul {
@@ -68,7 +68,7 @@ ul div {
 	position: absolute;
 	height: 100%;
 	opacity: 0.2;
-	width: 100%;
+	width: 99.9%;
 }
 
 .chart .bar {
@@ -76,7 +76,7 @@ ul div {
 	height: 100%;
 }
 .chart .bar.middle {
-	width: 9%;
+	width: 10%;
 }
 
 #majority-list {
