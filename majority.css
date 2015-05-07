@@ -75,6 +75,9 @@ ul div {
 	display:inline-block;
 	height: 100%;
 }
+.chart .bar.middle {
+	width: 9%;
+}
 
 #majority-list {
 	position: relative;

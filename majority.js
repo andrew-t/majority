@@ -186,12 +186,13 @@ function majoritise() {
 				return [];
 			}
 			if(party.seats>=target) {
-				return [{parties: [party], seats: party.seats}];
+				return [{parties: [party], seats: party.seats, opposition: parties.slice(0,i).concat(parties.slice(i+1))}];
 			} else {
 				var coalitions = find_majority(parties.slice(i+1),target-party.seats);
 				return coalitions.map(function(coalition){ 
 					coalition.parties.splice(0,0,party); 
 					coalition.seats += party.seats;
+					coalition.opposition = parties.slice(0,i).concat(coalition.opposition);
 					return coalition; 
 				});
 			}
@@ -221,7 +222,7 @@ function majoritise() {
 
 	mList.innerHTML = '';
 
-	majorityLine.style.left = (100*majority/650)+'%';
+	majorityLine.style.left = (90*majority/650)+'%';
 
 	majorities.forEach(function(coalition) {
 		var li = document.createElement('li');
@@ -230,13 +231,25 @@ function majoritise() {
 		var chart = document.createElement('span');
 		li.appendChild(chart);
 		chart.className = 'chart';
-		chart.style.width = (100*coalition.seats/650)+'%';
+		//chart.style.width = (100*coalition.seats/650)+'%';
 		coalition.parties.forEach(function(party) {
 			var bar = document.createElement('span');
 			chart.appendChild(bar);
 			bar.className = 'bar';
+			bar.setAttribute('title',party.name);
 			bar.style.background = party.colour || 'black';
-			bar.style.width = (100*party.seats/coalition.seats)+'%';
+			bar.style.width = (90*party.seats/650)+'%';
+		});
+		var middle = document.createElement('span');
+		chart.appendChild(middle);
+		middle.className = 'bar middle';
+		coalition.opposition.forEach(function(party) {
+			var bar = document.createElement('span');
+			chart.appendChild(bar);
+			bar.className = 'bar';
+			bar.setAttribute('title',party.name);
+			bar.style.background = party.colour || 'black';
+			bar.style.width = (90*party.seats/650)+'%';
 		});
 
 		var pm = pm_link(coalition.parties, coalition.seats);
@@ -245,7 +258,8 @@ function majoritise() {
 			return '<span style="color: ' + x.colour + '">' + x.name + ' ('+x.seats+')</span>';
 		}).join(' + ');
 
-		var vote_share = ' <span class="voteshare">(' + sum(coalition.parties, 'voteshare') + '%)</span> ';
+		var total_vote_share = sum(coalition.parties, 'voteshare');
+		var vote_share = total_vote_share>0 ? ' <span class="voteshare">(' + total_vote_share + '%)</span> ' : '';
 
 		li.innerHTML +=  '<span class="info">' + party_names + ' = ' + coalition.seats + vote_share + pm + '</span>';
 	});
