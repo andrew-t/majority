@@ -61,6 +61,7 @@ ul div {
 	display: inline-block;
 	margin: 1em;
 	background: white;
+	z-index: 3;
 }
 
 .chart {
