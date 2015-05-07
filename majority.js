@@ -2,121 +2,283 @@ var pList = document.getElementById('parties'),
 	mList = document.getElementById('majorities'),
 	others = document.getElementById('others'),
 	mBox = document.getElementById('majority'),
+	everyoneBox = document.getElementById('include-everyone-else'),
+	majorityLine = document.getElementById('majority-line'),
 	n = 1;
+
+everyoneBox.addEventListener('change',majoritise);
+mBox.addEventListener('change',majoritise);
+
 function button(id, cName) {
 	document.getElementById(id).addEventListener('click', function(e) {
 		document.body.classList.toggle(cName);
 		e.preventDefault();
 	})
 }
+function box(party,label, type, value, after, callback) {
+	var slug = label.replace(/ /g, '-');
+
+	var div = document.createElement('div');
+	div.className = slug;
+
+	var label_tag = document.createElement('label');
+	div.appendChild(label_tag);
+	label_tag.textContent = label+': ';
+
+	var input = document.createElement('input');
+	label_tag.appendChild(input);
+	input.value = value || '';
+	input.type = type || 'text';
+
+	input.addEventListener('change',function() {
+		var value = this.value;
+		if(type=='number') {
+			value = parseFloat(value || '0');
+		}
+		callback.apply(party,[value,true]);
+	});
+
+	if(after!==undefined) {
+		label_tag.appendChild(document.createTextNode(after));
+	}
+
+	return div;
+}
+
 button('show-colours', 'colours');
 button('show-vote-share', 'vote-share');
-document.body.addEventListener('input', majoritise);
-function addParty(name, colour, seats) {
-	var li = document.createElement('li');
-	li.id = 'party-' + n;
-	li.innerHTML = box('name', 'text', name) +
-		box('colour', 'text', colour) +
-		box('seats', 'number', seats) +
-		box('vote share', 'number', seats, '%');
-	pList.appendChild(li);
-	var cBox = document.getElementById('colour-' + n);
-	cBox.addEventListener('input', colourCBox);
-	colourCBox();
-	document.getElementById('name-' + n).addEventListener('input', function() {
-		for (var i = 1; i < n; ++i)
-			if (!document.getElementById('name-' + i).value)
+
+var all_parties = [];
+function Party(name,colour,seats) {
+	this.n = n++ - 1;
+	this.setName(name);
+	this.setColour(colour);
+	this.setSeats(seats);
+}
+Party.prototype = {
+	makeHTML: function() {
+		var party = this;
+
+		var li = this.html = document.createElement('li');
+		pList.appendChild(li);
+
+		li.id = 'party-' + this.n;
+		li.appendChild(box(this,'name', 'text', this.name,'',this.setName));
+		li.appendChild(box(this,'colour', 'text', this.colour,'',this.setColour));
+		li.appendChild(box(this,'seats', 'number', this.seats,'',this.setSeats));
+		li.appendChild(box(this,'vote share', 'number', this.seats, '%'));
+
+		this.displayName();
+		this.displaySeats();
+		this.displayColour();
+	},
+	
+	setName: function(name,interactive) {
+		this.name = name;
+
+		if(interactive) {
+			if(all_parties.filter(function(party) {	return !party.name; }).length) {
 				return;
-		addParty();
-	});
-	++n;
-	function colourCBox() { cBox.style.color = cBox.value; };
+			} else {
+				addParty();
+			}
+			majoritise();
+		}
+		this.displayName();
+	},
+
+	displayName: function() {
+		if(!this.html) {
+			return;
+		}
+		this.html.querySelector('.name input').value = this.name || '';
+	},
+
+	setColour: function(colour,interactive) {
+		this.colour = colour;
+		if(interactive) {
+			majoritise();
+		}
+	},
+
+	displayColour: function() {
+		if(!this.html) {
+			return;
+		}
+		this.html.querySelector('.colour input').style.color = this.colour;
+		this.html.querySelector('.colour input').value = this.colour || '';
+	},
+
+	setSeats: function(seats,interactive) {
+		this.seats = seats;
+		if(interactive) {
+			majoritise();
+		}
+		this.displaySeats();
+	},
+
+	displaySeats: function() {
+		if(!this.html) {
+			return;
+		}
+		this.html.querySelector('.seats input').value = this.seats;
+	}
 }
-function box(label, type, value, after) {
-	var lbl = label.replace(/ /g, ''),
-		id = lbl + '-' + n;
-	return '<div class="' + lbl + '">' +
-				'<label for="' + id + '">' + label + '</label>' +
-				'<input id="' + id +
-					'" name="' + id +
-					'" value="' + (value || '') +
-					'" type="' + (type || 'text') + '">' +
-				(after || '') + 
-			'</div>';
+
+function addParty(name,colour,seats) {
+	var p = new Party(name,colour,seats);
+
+	p.makeHTML();
+
+	all_parties.push(p);
 }
-addParty('Labour', 'red');
-addParty('Conservatives', 'blue');
-addParty('Lib Dems', '#f80');
-addParty('Greens', '#4d4');
-addParty('UKIP', 'purple');
-addParty('SNP', '#dd0');
-addParty('Plaid Cymru', 'green');
+
+var party_data = [
+	{name: 'Labour', colour: 'red'},
+	{name: 'Conservatives', colour: 'blue'},
+	{name: 'Lib Dems', colour: '#f80'},
+	{name: 'Greens', colour: '#4d4'},
+	{name: 'UKIP', colour: 'purple'},
+	{name: 'SNP', colour: '#dd0'},
+	{name: 'Plaid Cymru', colour: 'green'}
+];
+party_data.forEach(function(p){
+	addParty(p.name,p.colour);
+})
 addParty();
 majoritise();
-mBox.addEventListener('input', majoritise);
-function sort(a, b) {
+
+function sort_parties(a, b) {
 	if (a.name == 'Everyone else') return 1;
 	if (b.name == 'Everyone else') return -1;
 	if (a.seats != b.seats) return b.seats - a.seats;
 	if (a.name == b.name) return 0;
 	return a.name > b.name ? 1 : -1;
 }
-function majoritise() {
-	mList.innerHTML = '';
-	var parties = [];
-	for (var i = 1; i < n - 1; ++i)
-		parties.push(read(['name', 'colour', 'seats', 'voteshare'], i));
-	parties = parties.sort(sort).filter(function(a) { return a.name; });
-	var seats = sum(parties, 'seats');
-	if (seats < 650)
-		parties.push({
-			name: 'Everyone else',
-			colour: 'gray',
-			seats: 650 - seats
-		});
-	others.innerHTML = 650 - seats;
-	var majority = parseFloat(mBox.value);
-	build([]);
-	function build(pre) {
-		parties.forEach(function(next) {
-			if (next.seats &&
-				(!pre.length || (sort(next, pre[pre.length - 1]) > 0)) &&
-				!~pre.indexOf(next)) {
-				var now = pre.slice();
-				now.push(next);
-				var seats = sum(now, 'seats');
-				if (seats >= majority) {
-					var li = document.createElement('li'),
-						pm = thing(now, seats);
-					li.innerHTML = now.map(function(x) {
-						return '<span style="color: ' + x.colour + '">' + x.name + '</span>';
-					}).join(' + ') + ' = ' + seats +
-						' <span class="voteshare">(' + sum(now, 'voteshare') + '%)</span> ' +
-						(pm ? '<a href="' + pm + '" target="_blank">View PM</a>' : '');
-					mList.appendChild(li);
-				} else build(now);
-			}
-		});
-	}
-}
-function sum(parties, k) {
+
+function sum(coalition, property) {
 	var seats = 0;
-	parties.forEach(function(x) { if (x[k]) seats += x[k]; });
+	coalition.forEach(function(x) { 
+		if (x[property]) {
+			seats += x[property]; 
+		}
+	});
 	return seats;
 }
-function read(p, i) {
-	var x = { i: i };
-	p.forEach(function(k) {
-		var j = document.getElementById(k + '-' + i);
-		x[k] = (j.type == 'number') ? parseFloat(j.value || '0') : j.value;
+
+function majoritise() {
+	var parties = all_parties.slice().sort(sort_parties).filter(function(a) { return a.name; });
+
+	var seats = sum(parties, 'seats');
+
+	var include_everyone_else = everyoneBox.checked;
+
+	var everyone_else = new Party('Everyone else','gray',650 - seats);
+	if (seats < 650 && include_everyone_else) {
+		parties.push(everyone_else);
+	}
+
+	var majority = parseFloat(mBox.value);
+
+	function find_majority(parties,target) {
+		var coalitions = parties.map(function(party,i) {
+			if(!party.seats) {
+				return [];
+			}
+			if(party.seats>=target) {
+				return [{parties: [party], seats: party.seats, opposition: parties.slice(0,i).concat(parties.slice(i+1))}];
+			} else {
+				var coalitions = find_majority(parties.slice(i+1),target-party.seats);
+				return coalitions.map(function(coalition){ 
+					coalition.parties.splice(0,0,party); 
+					coalition.seats += party.seats;
+					coalition.opposition = parties.slice(0,i).concat(coalition.opposition);
+					return coalition; 
+				});
+			}
+		});
+		return Array.prototype.concat.apply([],coalitions);
+	}
+	var majorities = find_majority(parties,majority);
+
+	function sort_majorities(a,b) {
+		if(a.seats!=b.seats) {
+			return a.seats < b.seats ? 1 : a.seats>b.seats ? -1 : 0;
+		}
+		var a_leader = a.parties[0].seats;
+		var b_leader = b.parties[0].seats;
+		if(a_leader==b_leader) {
+			var a_parties = a.parties.length;
+			var b_parties = b.parties.length;
+			return a_parties>b_parties ? 1 : a_parties<b_parties ? -1 : 0;
+		} else {
+			return a_leader < b_leader ? 1 : -1;
+		}
+	}
+
+	majorities.sort(sort_majorities);
+
+	others.innerHTML = everyone_else.seats;
+
+	mList.innerHTML = '';
+
+	majorityLine.style.left = (90*majority/650)+'%';
+
+	majorities.forEach(function(coalition) {
+		var li = document.createElement('li');
+		mList.appendChild(li);
+
+		var chart = document.createElement('span');
+		li.appendChild(chart);
+		chart.className = 'chart';
+		//chart.style.width = (100*coalition.seats/650)+'%';
+		coalition.parties.forEach(function(party) {
+			var bar = document.createElement('span');
+			chart.appendChild(bar);
+			bar.className = 'bar';
+			bar.setAttribute('title',party.name);
+			bar.style.background = party.colour || 'black';
+			bar.style.width = (90*party.seats/650)+'%';
+		});
+		var middle = document.createElement('span');
+		chart.appendChild(middle);
+		middle.className = 'bar middle';
+		coalition.opposition.forEach(function(party) {
+			if(!party.seats) {
+				return;
+			}
+			var bar = document.createElement('span');
+			chart.appendChild(bar);
+			bar.className = 'bar';
+			bar.setAttribute('title',party.name);
+			bar.style.background = party.colour || 'black';
+			bar.style.width = (90*party.seats/650)+'%';
+		});
+
+		var pm = pm_link(coalition.parties, coalition.seats);
+
+		var party_names = coalition.parties.map(function(x) {
+			return '<span style="color: ' + x.colour + '">' + x.name + ' ('+x.seats+')</span>';
+		}).join(' + ');
+
+		var total_vote_share = sum(coalition.parties, 'voteshare');
+		var vote_share = total_vote_share>0 ? ' <span class="voteshare">(' + total_vote_share + '%)</span> ' : '';
+
+		li.innerHTML +=  '<span class="info">' + party_names + ' = ' + coalition.seats + vote_share + pm + '</span>';
 	});
-	return x;
 }
-function thing(coalition, seats) {
-	var pm = [0, 0, 0, 0, 0, 0, 0], ok = false;
-	coalition.forEach(function(party) { if (party.i < 7) {
-		pm[[null,1,0,2,3,4,5,6][party.i]] = party.seats / seats;
+function pm_link(coalition, seats) {
+	var pm = [0, 0, 0, 0, 0, 0, 0];
+	var ok = false;
+	coalition.forEach(function(party) { if (party.n < 7) {
+		pm[[1,0,2,3,4,5,6][party.n]] = party.seats / seats;
 		ok = true;
 	}});
-	return ok && ('http://github.andrewt.net/thingometer#' + JSON.stringify(pm));
+
+	if(ok) {
+		var url = 'http://github.andrewt.net/thingometer#' + JSON.stringify(pm);
+		return '<a class="btn" href="' + url + '" target="_blank">View PM</a>';
+	} else {
+		return '';
+	}
 }

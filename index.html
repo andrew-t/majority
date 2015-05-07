@@ -1,21 +1,34 @@
 <html>
 	<head>
-		<title>github.andrewt.net / majority</title>
+		<title>majority</title>
 		<link rel="stylesheet" type="text/css" href="majority.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 	</head>
 	<body class="colours vote-share">
 		<section><h1>Parties</h1><ul id="parties"></ul></section>
 		<section>
 			<div>Everyone else: <span id="others"></span></div>
 			<div>
+				<label>Allow coalitions involving everyone else: <input id="include-everyone-else" type="checkbox" checked="true"></label>
+			</div>
+			<div>
 				<label for="majority">Seats needed to govern</label>
 				<input id="majority" name="majority" type="number" value="326">
 			</div>
 		</section>
-		<section><h1>Majorities</h1><ul id="majorities"></ul></section>
 		<section>
-			<a href="#" id="show-colours">Toggle colours</a>
-			<a href="#" id="show-vote-share">Toggle vote share</a>
+			<a class="btn" href="#" id="show-colours">Toggle colours</a>
+			<a class="btn" href="#" id="show-vote-share">Toggle vote share</a>
+		</section>
+		<section>
+			<h1>Majorities</h1>
+			<div id="majority-list">
+				<div id="majority-line"></div>
+				<ul id="majorities"></ul>
+			</div>
+		</section>
+		<section>
+			<p>Based on <a href="http://github.andrewt.net/majority">github.andrewt.net/majority</a></p>
 		</section>
 		<script type="text/javascript" src="majority.js"></script>
 	</body>
